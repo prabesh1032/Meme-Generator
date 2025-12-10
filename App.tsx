@@ -9,8 +9,12 @@ const SUGGESTED_TOPICS = [
   "Production bug on Friday",
   "CSS centering div",
   "Git merge conflict",
-  "It works on my machine",
-  "Junior dev deleting database"
+  "React vs Vue vs Angular",
+  "useEffect dependency array",
+  "Junior dev deleting database",
+  "Redux boilerplate",
+  "Project Manager asking for 'one small change'",
+  "Deploying on Friday at 5PM"
 ];
 
 const MEME_TEMPLATES: MemeTemplate[] = [
@@ -67,6 +71,48 @@ const MEME_TEMPLATES: MemeTemplate[] = [
     name: 'Caffeine Overload',
     url: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
     description: 'A close-up of a strong cup of coffee, representing the fuel needed to survive a deadline.'
+  },
+  {
+    id: 't10',
+    name: 'Legacy Systems',
+    url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+    description: 'An old, dusty computer monitor or retro technology setup, representing legacy code or outdated documentation.'
+  },
+  {
+    id: 't11',
+    name: 'Pair Programming',
+    url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
+    description: 'People working together closely at a computer, or someone hovering over a shoulder, representing code reviews or micromanagement.'
+  },
+  {
+    id: 't12',
+    name: 'Deployment Success',
+    url: 'https://images.unsplash.com/photo-1533227297464-a3b440f07cba?auto=format&fit=crop&w=800&q=80',
+    description: 'A happy, party atmosphere with confetti or celebration, representing a successful launch or bug fix.'
+  },
+  {
+    id: 't13',
+    name: 'Choice Paralysis',
+    url: 'https://images.unsplash.com/photo-1596496050844-3613e3355536?auto=format&fit=crop&w=800&q=80',
+    description: 'A visual of many sticky notes or confusing options, representing choosing a JS framework or too many tickets.'
+  },
+  {
+    id: 't14',
+    name: 'Framework Battle',
+    url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=800&q=80',
+    description: 'Two artistic figures or forces clashing, representing a battle between React, Vue, and Angular.'
+  },
+  {
+    id: 't15',
+    name: 'State Management',
+    url: 'https://images.unsplash.com/photo-1529335764857-3f1164d1bef7?auto=format&fit=crop&w=800&q=80',
+    description: 'A person juggling multiple colorful balls, representing the chaos of managing state in a large application.'
+  },
+  {
+    id: 't16',
+    name: 'Prop Drilling',
+    url: 'https://images.unsplash.com/photo-1497250681960-ef04b1cd47e0?auto=format&fit=crop&w=800&q=80',
+    description: 'A deep, endless tunnel or spiral, representing the nightmare of passing props down multiple components.'
   }
 ];
 
@@ -87,6 +133,9 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<GeneratedMeme[]>([]);
   // State to track which meme is currently displayed
   const [selectedMemeId, setSelectedMemeId] = useState<string | null>(null);
+  
+  // State for delete confirmation
+  const [memeToDelete, setMemeToDelete] = useState<string | null>(null);
   
   const [error, setError] = useState<string | null>(null);
 
@@ -179,6 +228,24 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const requestDelete = (id: string) => {
+    setMemeToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (memeToDelete) {
+        setHistory(prev => prev.filter(m => m.id !== memeToDelete));
+        if (selectedMemeId === memeToDelete) {
+            setSelectedMemeId(null);
+        }
+        setMemeToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setMemeToDelete(null);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleGenerate();
@@ -194,7 +261,7 @@ const App: React.FC = () => {
           DevMeme Gen
         </h1>
         <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-          Turn your coding trauma into comedy.
+          Turn your coding struggles into hilarious memes using AI-generated visuals and captions.
         </p>
       </div>
 
@@ -229,12 +296,15 @@ const App: React.FC = () => {
         {mode === 'TEMPLATE' && (
           <div className="mb-8 animate-fade-in-up">
             <h3 className="text-gray-300 text-sm font-semibold uppercase tracking-wider mb-4">Select or Upload Template:</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                {/* Upload Button */}
                <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="aspect-square rounded-lg border-2 border-dashed border-gray-600 hover:border-purple-500 hover:bg-gray-800 cursor-pointer flex flex-col items-center justify-center transition-all group"
-                  title="Upload your own image"
+                  className={`
+                    aspect-square rounded-lg border-2 border-dashed cursor-pointer flex flex-col items-center justify-center transition-all group
+                    ${customTemplate ? 'border-purple-500/50 bg-purple-900/10 hover:bg-purple-900/20' : 'border-gray-600 hover:border-purple-500 hover:bg-gray-800'}
+                  `}
+                  title={customTemplate ? "Replace your custom image" : "Upload your own image"}
                >
                   <input 
                       type="file" 
@@ -243,25 +313,40 @@ const App: React.FC = () => {
                       className="hidden" 
                       accept="image/*"
                   />
-                  <svg className="w-8 h-8 text-gray-400 group-hover:text-purple-500 mb-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className={`w-8 h-8 mb-2 transition-colors ${customTemplate ? 'text-purple-400' : 'text-gray-400 group-hover:text-purple-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
-                  <span className="text-xs text-gray-400 group-hover:text-white font-bold uppercase transition-colors">Upload Own</span>
+                  <span className={`text-xs font-bold uppercase transition-colors ${customTemplate ? 'text-purple-300' : 'text-gray-400 group-hover:text-white'}`}>
+                    {customTemplate ? 'Replace Image' : 'Upload Own'}
+                  </span>
                </div>
 
-               {/* Custom Template Display (if exists) */}
+               {/* Custom Template Display in Grid */}
                {customTemplate && (
                  <div 
                    onClick={() => setSelectedTemplate(customTemplate)}
                    className={`
-                     relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all
-                     ${selectedTemplate?.id === 'custom' ? 'border-purple-500 ring-2 ring-purple-500/50 scale-105' : 'border-gray-700 hover:border-gray-500'}
+                     relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all group
+                     ${selectedTemplate?.id === 'custom' 
+                        ? 'border-purple-500 ring-2 ring-purple-500/50 scale-105 shadow-lg shadow-purple-500/20' 
+                        : 'border-purple-500/30 hover:border-purple-500'}
                    `}
                  >
                    <img src={customTemplate.url} alt="Custom" className="w-full h-full object-cover" />
-                   <div className="absolute inset-x-0 bottom-0 bg-black/70 p-1 text-center">
-                     <span className="text-xs text-white font-bold">Your Upload</span>
+                   <div className="absolute inset-x-0 bottom-0 bg-black/70 p-1 text-center backdrop-blur-sm">
+                     <span className="text-xs text-purple-200 font-bold flex items-center justify-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        Yours
+                     </span>
                    </div>
+                   {/* Selected Indicator Checkmark */}
+                   {selectedTemplate?.id === 'custom' && (
+                    <div className="absolute top-1 right-1 bg-purple-600 rounded-full p-0.5 shadow">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                  )}
                  </div>
                )}
 
@@ -279,23 +364,79 @@ const App: React.FC = () => {
                   <div className="absolute inset-x-0 bottom-0 bg-black/70 p-1 text-center">
                     <span className="text-xs text-white font-bold">{t.name}</span>
                   </div>
+                  {/* Selected Indicator Checkmark */}
+                  {selectedTemplate?.id === t.id && (
+                    <div className="absolute top-1 right-1 bg-purple-600 rounded-full p-0.5 shadow">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
-            {/* Custom Description Input */}
-            {selectedTemplate?.id === 'custom' && (
-                <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-purple-500/30 animate-fade-in">
-                    <label className="block text-gray-400 text-xs font-bold uppercase mb-2">
-                        Describe your image for better AI captions (Optional):
-                    </label>
-                    <input 
-                        type="text" 
-                        value={customDescription}
-                        onChange={(e) => setCustomDescription(e.target.value)}
-                        placeholder="e.g., A confused cat looking at a laptop"
-                        className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none placeholder-gray-600"
-                    />
+            {/* Selected Template Preview & Context */}
+            {selectedTemplate && (
+                <div className={`
+                    p-4 rounded-xl border flex flex-col md:flex-row gap-4 items-center animate-fade-in shadow-lg transition-colors
+                    ${selectedTemplate.id === 'custom' ? 'bg-purple-900/20 border-purple-500/50' : 'bg-gray-800 border-gray-700'}
+                `}>
+                    <div className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 rounded-lg overflow-hidden border border-gray-600 bg-black relative">
+                        <img src={selectedTemplate.url} alt={selectedTemplate.name} className="w-full h-full object-cover" />
+                        {selectedTemplate.id === 'custom' && (
+                           <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                             <span className="bg-black/50 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-md">Preview</span>
+                           </div>
+                        )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 w-full">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className={`text-xs font-bold uppercase tracking-wider ${selectedTemplate.id === 'custom' ? 'text-purple-300' : 'text-gray-400'}`}>
+                                {selectedTemplate.id === 'custom' ? 'Custom Template Selected' : 'Template Selected'}
+                            </span>
+                             {selectedTemplate.id === 'custom' && (
+                                <span className="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">ACTIVE</span>
+                            )}
+                        </div>
+                        
+                        {selectedTemplate.id === 'custom' ? (
+                            <div className="bg-gray-900/50 p-3 rounded-lg border border-purple-500/30">
+                                <label className="block text-xs text-purple-200 mb-1.5 font-semibold">
+                                    Describe your image for the AI:
+                                </label>
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        value={customDescription}
+                                        onChange={(e) => setCustomDescription(e.target.value)}
+                                        placeholder="e.g. 'A cat looking confused at a laptop'..."
+                                        className="w-full bg-gray-800 text-white text-sm border border-gray-600 rounded-md pl-3 pr-10 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none placeholder-gray-500 transition-all"
+                                        autoFocus
+                                    />
+                                    <div className="absolute right-3 top-2.5 text-gray-500 pointer-events-none">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-2 flex items-center gap-1">
+                                    <svg className="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    This helps the AI generate relevant captions.
+                                </p>
+                            </div>
+                        ) : (
+                            <div>
+                                <h4 className="text-white font-bold text-lg mb-1">{selectedTemplate.name}</h4>
+                                <div className="bg-gray-900/50 rounded p-2 border border-gray-700/50">
+                                    <p className="text-gray-400 text-xs italic line-clamp-2">
+                                        "{selectedTemplate.description}"
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
           </div>
@@ -376,8 +517,33 @@ const App: React.FC = () => {
       <MemeHistory 
         history={history} 
         onSelect={handleSelectHistoryItem} 
+        onDelete={requestDelete}
         selectedId={activeMeme?.id}
       />
+
+      {/* Delete Confirmation Modal */}
+      {memeToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 max-w-sm w-full shadow-2xl transform transition-all scale-100">
+                <h3 className="text-xl font-bold text-white mb-2">Delete Meme?</h3>
+                <p className="text-gray-400 mb-6">Are you sure you want to remove this masterpiece from your history? This cannot be undone.</p>
+                <div className="flex gap-3 justify-end">
+                    <button 
+                        onClick={cancelDelete}
+                        className="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-medium"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={confirmDelete}
+                        className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold shadow-lg shadow-red-900/50 transition-colors"
+                    >
+                        Delete Forever
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
 
     </div>
   );

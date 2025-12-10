@@ -4,10 +4,11 @@ import { GeneratedMeme } from '../types';
 interface MemeHistoryProps {
   history: GeneratedMeme[];
   onSelect: (meme: GeneratedMeme) => void;
+  onDelete: (id: string) => void;
   selectedId?: string;
 }
 
-const MemeHistory: React.FC<MemeHistoryProps> = ({ history, onSelect, selectedId }) => {
+const MemeHistory: React.FC<MemeHistoryProps> = ({ history, onSelect, onDelete, selectedId }) => {
   if (history.length === 0) return null;
 
   return (
@@ -55,6 +56,20 @@ const MemeHistory: React.FC<MemeHistoryProps> = ({ history, onSelect, selectedId
                  {selectedId === meme.id && (
                     <div className="absolute inset-0 bg-blue-500/10 pointer-events-none" />
                  )}
+
+                 {/* Delete Button */}
+                 <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(meme.id);
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:scale-110 z-20 shadow-lg"
+                    title="Delete Meme"
+                 >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                 </button>
             </div>
 
             {/* Meta Info */}

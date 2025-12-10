@@ -13,7 +13,7 @@ You must output a JSON object with three fields:
 3. "imagePrompt": A highly descriptive visual prompt for an image generation model to create the background.
 
 Guidelines:
-- Humor Topics: HTML/CSS, JS, React, Backend, Debugging, Git, Senior vs Junior, Deadlines.
+- Humor Topics: HTML/CSS, JS, React, Backend, Debugging, Git, Senior vs Junior, Deadlines, AI Tools (Copilot/ChatGPT), Legacy Code, Project Managers, DevOps, CSS Frameworks, Frontend Frameworks (React vs Vue vs Angular), State Management (Redux/Context), Hydration Errors.
 - Style: Classic meme format (Top/Bottom text).
 - The "imagePrompt" must describe a cartoon or illustration style scene. 
 - IMPORTANT: The "imagePrompt" must NOT include any text instructions for the image itself. The image should be text-free so we can overlay the meme text later.
